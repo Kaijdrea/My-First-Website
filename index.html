@@ -1,5 +1,165 @@
-<! DOCTYPE html> <html><head> <title>[Fish Game
-l</title> <style>
-body(font-family:Arial;max-width:680px; margin: 40px auto;) hl(color:#2244aa;) </style> </head><body> <h1>[A small crappy game]</hl> <p>[Its suppsosed to be a small fishing minigame, made with AI.]</p> <h2>[This is just a simple project.]</h2> <ul> <li>[I used starter code from the teacher.]</li> <li>[Co-Pilot was used.]</li> <li>|I don't get benefit from this.]</li>
-</ul> <p>Made by [Andrew C]</p>
-</body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fish Game</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 680px;
+      margin: 40px auto;
+      background: #87ceeb;
+      text-align: center;
+    }
+
+    h1 {
+      color: #2244aa;
+    }
+
+    canvas {
+      border: 3px solid #000;
+      background: linear-gradient(#5dade2, #154360);
+      margin-top: 20px;
+      cursor: crosshair;
+    }
+
+    #score {
+      font-size: 20px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ✅ Teacher Starter Content -->
+  <h1>A small crappy game</h1>
+
+  <p>Its supposed to be a small fishing minigame, made with AI.</p>
+
+  <h2>This is just a simple project.</h2>
+
+  <ul style="text-align:left">
+    <li>I used starter code from the teacher.</li>
+    <li>Co-Pilot was used.</li>
+    <li>I don't get benefit from this.</li>
+  </ul>
+
+  <p>Made by Andrew C</p>
+
+  <hr>
+
+  <!-- ✅ Game Section -->
+  <h2>🎣 Fishing Minigame</h2>
+  <div id="score">Score: 0</div>
+  <canvas id="gameCanvas" width="600" height="400"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let score = 0;
+    let hookY = 0;
+    let hookActive = false;
+
+    const fishList = [];
+
+    function createFish() {
+      const size = Math.random() * 20 + 20;
+      fishList.push({
+        x: -size,
+        y: Math.random() * 300 + 50,
+        size: size,
+        speed: Math.random() * 2 + 1,
+        color: `hsl(${Math.random() * 360}, 70%, 50%)`
+      });
+    }
+
+    function drawFish(fish) {
+      ctx.fillStyle = fish.color;
+
+      // Body
+      ctx.beginPath();
+      ctx.moveTo(fish.x, fish.y);
+      ctx.lineTo(fish.x + fish.size, fish.y - fish.size / 2);
+      ctx.lineTo(fish.x + fish.size, fish.y + fish.size / 2);
+      ctx.closePath();
+      ctx.fill();
+
+      // Tail
+      ctx.beginPath();
+      ctx.moveTo(fish.x + fish.size, fish.y);
+      ctx.lineTo(fish.x + fish.size + 10, fish.y - 10);
+      ctx.lineTo(fish.x + fish.size + 10, fish.y + 10);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawHook() {
+      if (!hookActive) return;
+
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2;
+
+      ctx.beginPath();
+      ctx.moveTo(canvas.width / 2, 0);
+      ctx.lineTo(canvas.width / 2, hookY);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, hookY + 8, 6, 0, Math.PI);
+      ctx.stroke();
+    }
+
+    function checkCatch(fish) {
+      return (
+        hookActive &&
+        fish.x < canvas.width / 2 &&
+        fish.x + fish.size > canvas.width / 2 &&
+        fish.y > hookY - 10 &&
+        fish.y < hookY + 10
+      );
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawHook();
+
+      for (let i = fishList.length - 1; i >= 0; i--) {
+        const fish = fishList[i];
+        fish.x += fish.speed;
+        drawFish(fish);
+
+        if (checkCatch(fish)) {
+          score++;
+          document.getElementById("score").textContent = "Score: " + score;
+          fishList.splice(i, 1);
+          hookActive = false;
+        }
+
+        if (fish.x > canvas.width + 50) {
+          fishList.splice(i, 1);
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    canvas.addEventListener("click", (e) => {
+      if (!hookActive) {
+        hookActive = true;
+        hookY = e.offsetY;
+
+        setTimeout(() => {
+          hookActive = false;
+        }, 1000);
+      }
+    });
+
+    setInterval(createFish, 1200);
+    update();
+  </script>
+
+</body>
+</html>
